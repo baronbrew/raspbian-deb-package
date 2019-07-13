@@ -16,7 +16,7 @@
 # limitations under the License.
 
 # can remove next line if already updated....
-#sudo apt-get update
+#sudo apt update -y
 sudo rm -rf /usr/local/lib/node_modules/
 sudo rm -rf /usr/local/bin/node-red*
 sudo rm -rf /usr/lib/node_modules/
@@ -25,21 +25,22 @@ sudo rm -rf /usr/bin/update-nodejs-and-nodered
 sudo rm -rf /home/pi/.npm /home/pi/.node-gyp
 sudo rm -rf /root/.npm /root/.node-gyp
 
-sudo apt-get install nodejs nodejs-legacy npm lintian -y
-sudo npm install -g --unsafe-perm npm@3.x
+# sudo apt install nodejs nodejs-legacy npm lintian
+sudo apt install -y build-essential nodejs npm lintian
+sudo npm install -g --unsafe-perm npm@latest
 # Get node.js 4.8.2 to match stretch ... for now
 #wget https://nodejs.org/download/release/v4.8.2/node-v4.8.2-linux-armv6l.tar.gz -O /tmp/node.tgz
 #sudo tar -zxf /tmp/node.tgz --strip-components=1 -C /usr
 
 hash -r
-sudo npm cache clean
+sudo npm cache clean --force
 echo " "
 echo "Installed"
 echo "   Node" $(node -v)
 echo "   Npm   "$(npm -v)
 echo "Now installing Node-RED - please wait - can take 25 mins on a Pi 1"
 echo "   Node-RED "$(npm show node-red version)
-sudo npm i -g --unsafe-perm --no-progress node-red
+sudo npm i -g --unsafe-perm --no-progress --production node-red
 
 # Remove existing serialport
 sudo rm -rf /usr/lib/node_modules/node-red/nodes/node_modules/node-red-node-serialport
@@ -53,6 +54,7 @@ sudo find . -type d -name sample -exec rm -r {} \;
 sudo find . -type d -iname benchmark* -exec rm -r {} \;
 sudo find . -type d -iname .nyc_output -exec rm -r {} \;
 sudo find . -type d -iname unpacked -exec rm -r {} \;
+sudo find . -type d -iname demo -exec rm -r {} \;
 
 sudo find . -name bench.gnu -type f -exec rm {} \;
 sudo find . -name .npmignore -type f -exec rm {} \;
@@ -78,12 +80,10 @@ sudo npm install -g --unsafe-perm --no-progress node-red-node-random node-red-no
 sudo npm install -g --unsafe-perm --no-progress node-red-contrib-ibm-watson-iot node-red-node-pi-sense-hat
 # sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 
-match='uiPort: 1880,'
+match='editorTheme: {'
 file='/usr/lib/node_modules/node-red/settings.js'
-insert='\n    editorTheme: { menu: { \"menu-item-help": {\n        label: \"Node-RED Pi Website\",\n        url: \"http:\/\/nodered.org\/docs\/hardware\/raspberrypi.html\"\n    } } },\n'
-sudo sed -i "s/$match/$match\n$insert/" $file
-echo "**** settings.js ****"
-head -n 32 /usr/lib/node_modules/node-red/settings.js
+insert='editorTheme: {\n        menu: { \"menu-item-help\": {\n            label: \"Node-RED Pi Website\",\n            url: \"http:\/\/nodered.org\/docs\/hardware\/raspberrypi.html\"\n        } },'
+sudo sed -i "s|$match|$insert|" $file
 echo "*********************"
 
 # Get systemd script - start and stop scripts - svg icon - and .desktop file into correct places.
